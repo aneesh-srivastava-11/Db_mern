@@ -1,0 +1,33 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Collection {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId  String
+  name      String
+  schema    Json?    // Optional JSON schema for validation
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Record {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId     String
+  collection   String
+  ownerId      String   // User ID from JWT
+  data         Json     // Generic payload
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([tenantId, collection])
+  @@index([tenantId, collection, ownerId])
+}
